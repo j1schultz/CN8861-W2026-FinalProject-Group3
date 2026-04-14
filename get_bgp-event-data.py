@@ -19,21 +19,41 @@ stream = pybgpstream.BGPStream(
 )
 '''
 
-event_name = "2016_backconnect_"
-start_str ="2016-02-20 08:00:00 UTC"
-end_str   ="2016-02-20 09:00:00 UTC"
-prefix = "prefix more 72.20.0.0/19"
+#-----------------forged_as_path-----------------
+#event_name = "2016_backconnect_"
+#start_str ="2016-02-20 08:00:00 UTC"
+#end_str   ="2016-02-20 09:00:00 UTC"
+#prefix = "prefix more 72.20.0.0/19"
 
+#event_name = "2011_facebook_"
+#start_str ="2011-03-22 07:00:00 UTC"
+#end_str   ="2011-03-22 16:00:00 UTC"
+#prefix = "prefix more 69.171.255.0/24"
+
+
+#-----------------origin_change-----------------
 #event_name = "2018_Amazon_"
 #start_str ="2018-04-24 11:00:00 UTC"
 #end_str   ="2018-04-24 12:00:00 UTC"
 #prefix = "prefix more 205.251.192.0/24"
 
+
+#-----------------prepend-----------------
+#event_name = "2018_MEGANET_"
+#start_str ="2018-04-28 12:00:00 UTC"
+#end_str   ="2018-04-29 12:00:00 UTC"
+#prefix = "prefix more 131.108.159.0/24"
+
+
+#-----------------typo-----------------
+event_name = "2016_TIM_"
+start_str ="2016-05-20 21:00:00 UTC"
+end_str   ="2016-05-21 21:00:00 UTC"
+prefix = "prefix more 191.86.128.0/19"
+
 fmt = "%Y-%m-%d %H:%M:%S %Z"
 current_timeframe = datetime.strptime(start_str, fmt)
 end_timeframe = datetime.strptime(end_str, fmt)
-
-
 
 def check_stream(element):
     required_fields = ["prefix", "next-hop", "communities", "as-path"]
@@ -78,7 +98,9 @@ def pull_bgp_data(start, end, prefix, event):
             dict_writer.writeheader()
             dict_writer.writerows(bgp_event_data)
     else:
-        print(f"no events during: {event}{start}-{end}")
+        with open('no_data.csv', 'a') as file:
+            writer = csv.writer(file)
+            writer.writerow([f"no events during: {event}{start}-{end} \n"])
 
 
 
