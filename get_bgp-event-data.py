@@ -6,54 +6,45 @@ import csv
 
 from datetime import datetime, timedelta
 
-'''
-event_name = "2018_Amazon_"
-start ="2018-04-24 11:00:00 UTC"
-end ="2018-04-24 12:00:00 UTC"
+event_dict = [
+    {
+        "event_name": "2018_Amazon_",
+        "start_str": "2018-04-24 11:00:00 UTC",
+        "end_str": "2018-04-24 12:00:00 UTC",
+        "prefix": "prefix more 205.251.192.0/24",
+        "event_type": "origin_change"
+    },
+    {
+        "event_name": "2016_backconnect_",
+        "start_str": "2016-02-20 08:00:00 UTC",
+        "end_str": "2016-02-20 09:00:00 UTC",
+        "prefix": "prefix more 72.20.0.0/19",
+        "event_type": "forged_as_path"
+    },
+    {
+        "event_name": "2011_facebook_",
+        "start_str": "2011-03-22 07:00:00 UTC",
+        "end_str": "2011-03-22 16:00:00 UTC",
+        "prefix": "prefix more 69.171.255.0/24",
+        "event_type": "forged_as_path"
+    },
+    {
+        "event_name": "2018_MEGANET_",
+        "start_str": "2018-04-28 12:00:00 UTC",
+        "end_str": "2018-04-29 12:00:00 UTC",
+        "prefix": "prefix more 131.108.159.0/24",
+        "event_type": "prepend"
+    },
+    {
+        "event_name": "2016_TIM_",
+        "start_str": "2016-05-20 21:00:00 UTC",
+        "end_str": "2016-05-21 21:00:00 UTC",
+        "prefix": "prefix more 191.86.128.0/19",
+        "event_type": "typo"
+    }
+]
 
-stream = pybgpstream.BGPStream(
-    from_time="2018-04-24 11:00:00 UTC", until_time="2018-04-24 12:00:00 UTC",
-    collectors=["route-views.sg", "route-views.eqix"],
-    record_type="updates",
-    filter="prefix more 205.251.192.0/24"
-)
-'''
 
-#-----------------forged_as_path-----------------
-#event_name = "2016_backconnect_"
-#start_str ="2016-02-20 08:00:00 UTC"
-#end_str   ="2016-02-20 09:00:00 UTC"
-#prefix = "prefix more 72.20.0.0/19"
-
-#event_name = "2011_facebook_"
-#start_str ="2011-03-22 07:00:00 UTC"
-#end_str   ="2011-03-22 16:00:00 UTC"
-#prefix = "prefix more 69.171.255.0/24"
-
-
-#-----------------origin_change-----------------
-#event_name = "2018_Amazon_"
-#start_str ="2018-04-24 11:00:00 UTC"
-#end_str   ="2018-04-24 12:00:00 UTC"
-#prefix = "prefix more 205.251.192.0/24"
-
-
-#-----------------prepend-----------------
-#event_name = "2018_MEGANET_"
-#start_str ="2018-04-28 12:00:00 UTC"
-#end_str   ="2018-04-29 12:00:00 UTC"
-#prefix = "prefix more 131.108.159.0/24"
-
-
-#-----------------typo-----------------
-event_name = "2016_TIM_"
-start_str ="2016-05-20 21:00:00 UTC"
-end_str   ="2016-05-21 21:00:00 UTC"
-prefix = "prefix more 191.86.128.0/19"
-
-fmt = "%Y-%m-%d %H:%M:%S %Z"
-current_timeframe = datetime.strptime(start_str, fmt)
-end_timeframe = datetime.strptime(end_str, fmt)
 
 def check_stream(element):
     required_fields = ["prefix", "next-hop", "communities", "as-path"]
@@ -78,10 +69,8 @@ def pull_bgp_data(start, end, prefix, event):
 
     bgp_event_data = []
     for elem in stream:
-        #print(elem)
         fields_values = check_stream(elem)
         
-        #if hijacker_number in as_path:
         clean_elem = {
             "time": elem.time,
             "type": elem.type,
@@ -103,15 +92,21 @@ def pull_bgp_data(start, end, prefix, event):
             writer.writerow([f"no events during: {event}{start}-{end} \n"])
 
 
+def retrieve_event(start_str, end_str, prefix, event_name):
+    fmt = "%Y-%m-%d %H:%M:%S %Z"
+    current_timeframe = datetime.strptime(start_str, fmt)
+    end_timeframe = datetime.strptime(end_str, fmt)
 
-while current_timeframe <= end_timeframe:
-    start_time = time.perf_counter()
+    while current_timeframe <= end_timeframe:
+        start_time = time.perf_counter()
+        temp_end = current_timeframe + timedelta(hours=1)
+        
+        pull_bgp_data(str(current_timeframe),str(temp_end), prefix, event_name)
+        current_timeframe += timedelta(hours=1)
 
-    #print(current_timeframe.strftime(fmt))
-    temp_end = current_timeframe + timedelta(hours=1)
-    pull_bgp_data(str(current_timeframe),str(temp_end), prefix, event_name)
-    # 3. Increment by 1 hour
-    current_timeframe += timedelta(hours=1)
+        end_time = time.perf_counter()
+        print(f"Elapsed time: {end_time - start_time:0.4f} seconds")
 
-    end_time = time.perf_counter()
-    print(f"Elapsed time: {end_time - start_time:0.4f} seconds")
+
+for i in event_dict:
+    retrieve_event(i["start_str"], i["end_str"], i["prefix"], i["event_name"])
