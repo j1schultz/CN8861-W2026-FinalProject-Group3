@@ -15,13 +15,6 @@ event_dict = [
         "event_type": "origin_change"
     },
     {
-        "event_name": "2016_backconnect_",
-        "start_str": "2016-02-20 08:00:00 UTC",
-        "end_str": "2016-02-20 09:00:00 UTC",
-        "prefix": "prefix more 72.20.0.0/19",
-        "event_type": "forged_as_path"
-    },
-    {
         "event_name": "2011_facebook_",
         "start_str": "2011-03-22 07:00:00 UTC",
         "end_str": "2011-03-22 16:00:00 UTC",
@@ -82,7 +75,7 @@ def pull_bgp_data(start, end, prefix, event):
 
     if len(bgp_event_data) != 0:        
         keys = bgp_event_data[0].keys()
-        with open(f'{event}_{start}_{end}.csv', 'w', newline='') as output_file:
+        with open(f'./bgpdata_collection/{event}_{start}_{end}.csv', 'w', newline='') as output_file:
             dict_writer = csv.DictWriter(output_file, fieldnames=keys)
             dict_writer.writeheader()
             dict_writer.writerows(bgp_event_data)
@@ -100,7 +93,7 @@ def retrieve_event(start_str, end_str, prefix, event_name):
     while current_timeframe <= end_timeframe:
         start_time = time.perf_counter()
         temp_end = current_timeframe + timedelta(hours=1)
-        
+
         pull_bgp_data(str(current_timeframe),str(temp_end), prefix, event_name)
         current_timeframe += timedelta(hours=1)
 
