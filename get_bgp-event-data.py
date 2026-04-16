@@ -1,42 +1,30 @@
 import pybgpstream
 import os
-
 import time
 import csv
-
 from datetime import datetime, timedelta
+import pandas as pd
 
-event_dict = [
-    {
-        "event_name": "2018_Amazon_",
-        "start_str": "2018-04-24 11:00:00 UTC",
-        "end_str": "2018-04-24 12:00:00 UTC",
-        "prefix": "prefix more 205.251.192.0/24",
-        "event_type": "origin_change"
-    },
-    {
-        "event_name": "2011_facebook_",
-        "start_str": "2011-03-22 07:00:00 UTC",
-        "end_str": "2011-03-22 16:00:00 UTC",
-        "prefix": "prefix more 69.171.255.0/24",
-        "event_type": "forged_as_path"
-    },
-    {
-        "event_name": "2018_MEGANET_",
-        "start_str": "2018-04-28 12:00:00 UTC",
-        "end_str": "2018-04-29 12:00:00 UTC",
-        "prefix": "prefix more 131.108.159.0/24",
-        "event_type": "prepend"
-    },
-    {
-        "event_name": "2016_TIM_",
-        "start_str": "2016-05-20 21:00:00 UTC",
-        "end_str": "2016-05-21 21:00:00 UTC",
-        "prefix": "prefix more 191.86.128.0/19",
-        "event_type": "typo"
-    }
-]
+#Objective: merge Cho et al. datasets 
+#reading in each dataset as a pandas dataframe
+cho_data = 'cho_datasets/results_news_updated_2.csv'
+cho_new_data = 'cho_datasets/news_updated.csv'
+cho_df = pd.read_csv(cho_data)
+cho_new_df = pd.read_csv(cho_new_data)
 
+#adjusting column names to match
+cho_df["new_title"] = cho_df["title"].str.split('.').str[0]
+cho_new_df["new_title"] = cho_new_df["title"]
+cho_new_df["vt_pfx"] = cho_new_df["prefix"]
+
+#merging the 2 files based on the title and prefix
+merged_cho = pd.merge(cho_df, cho_new_df, on=['new_title', 'vt_pfx'])
+
+#converting time to an acceptable format for BGPStream
+merged_cho['converted_start_time'] = pd.to_datetime(merged_cho['start_time'])
+merged_cho['converted_end_time'] = merged_cho['converted_start_time'] + pd.Timedelta(hours=24)
+merged_cho['formatted_start_time'] = merged_cho['converted_start_time'].dt.tz_localize('UTC').dt.strftime('%Y-%m-%d %H:%M:%S %Z')
+merged_cho['formatted_end_time'] = merged_cho['converted_end_time'].dt.tz_localize('UTC').dt.strftime('%Y-%m-%d %H:%M:%S %Z')
 
 
 def check_stream(element):
@@ -55,7 +43,7 @@ def pull_bgp_data(start, end, prefix, event):
         from_time=start, until_time=end,
         collectors=["route-views.sg", "route-views.eqix"],
         record_type="updates",
-        filter=prefix
+        filter= f"prefix more {prefix}"
     )
 
     stream.set_data_interface_option("broker", "cache-dir", "./cache_folder_1")
@@ -101,5 +89,13 @@ def retrieve_event(start_str, end_str, prefix, event_name):
         print(f"Elapsed time: {end_time - start_time:0.4f} seconds")
 
 
-for i in event_dict:
-    retrieve_event(i["start_str"], i["end_str"], i["prefix"], i["event_name"])
+#For each event retrieve BGP data from the (start time) to (start time + 24 hours) 
+#retrieve data based on prefix
+#title used to label output files
+'''
+for i in merged_cho.to_dict('records'):
+    retrieve_event(i["formatted_start_time"], i["formatted_end_time"], i["vt_pfx"], i["new_title"])
+'''
+
+#saved cho data for later use
+merged_cho.to_csv('cho_datasets/all_cho_data.csv', index=False)
