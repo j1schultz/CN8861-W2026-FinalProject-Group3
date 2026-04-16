@@ -1,0 +1,3 @@
+record_type,time,type,peer_address,prefix,next-hop,communities,as-path
+update,1407329718.0,W,206.126.236.181,177.39.184.0/23,None,None,None
+update,1407329759.0,W,206.126.236.181,177.39.184.0/23,None,None,None
