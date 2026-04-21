@@ -1,0 +1,2 @@
+record_type,time,type,peer_address,prefix,next-hop,communities,as-path
+update,1532981863.0,A,27.111.228.206,91.108.56.0/23,27.111.228.81,"{'63927:2101', '63927:103', '63927:50201'}",63927 6939 62014
