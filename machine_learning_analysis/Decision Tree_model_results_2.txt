@@ -1,0 +1,18 @@
+
+========================
+Model: Decision Tree
+========================
+Accuracy: 0.8571428571428571
+
+Classification Report:
+                precision    recall  f1-score   support
+
+forged_as_path       0.83      0.83      0.83         6
+ origin_change       0.71      0.83      0.77         6
+       prepend       1.00      0.83      0.91         6
+          typo       1.00      1.00      1.00         3
+
+      accuracy                           0.86        21
+     macro avg       0.89      0.88      0.88        21
+  weighted avg       0.87      0.86      0.86        21
+

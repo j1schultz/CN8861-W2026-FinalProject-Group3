@@ -12,7 +12,8 @@ from sklearn.neighbors import KNeighborsClassifier
 # -------------------------------
 # LOAD DATA
 # -------------------------------
-df = pd.read_csv("../data/dataset.csv")
+#df = pd.read_csv("../data/dataset.csv")
+df = pd.read_csv("../cho_datasets/dataset.csv")
 
 # FIX: handle missing values
 df = df.fillna(0)

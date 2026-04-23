@@ -1,0 +1,18 @@
+
+========================
+Model: KNN
+========================
+Accuracy: 0.9047619047619048
+
+Classification Report:
+                precision    recall  f1-score   support
+
+forged_as_path       1.00      1.00      1.00         6
+ origin_change       0.83      0.83      0.83         6
+       prepend       1.00      0.83      0.91         6
+          typo       0.75      1.00      0.86         3
+
+      accuracy                           0.90        21
+     macro avg       0.90      0.92      0.90        21
+  weighted avg       0.92      0.90      0.91        21
+
